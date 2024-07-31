@@ -1,0 +1,18 @@
+services:
+  task-manager-server:
+    build: .
+    container_name: task_manager_container
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-server
+    links:
+      - postgres-server
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+
+volumes:
+  postgres_data:
