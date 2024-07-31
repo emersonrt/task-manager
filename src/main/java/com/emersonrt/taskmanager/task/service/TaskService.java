@@ -18,6 +18,9 @@ import java.util.UUID;
 @Service
 public class TaskService {
 
+    private static final String CATEGORY_NOT_FOUND = "Category not found!";
+    private static final String TASK_NOT_FOUND = "Task not found!";
+
     private final TaskRepository taskRepository;
 
     private final CategoryRepository categoryRepository;
@@ -36,7 +39,7 @@ public class TaskService {
 
     public TaskResponseDTO getTaskById(UUID id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Task not found!"));
+                .orElseThrow(() -> new NotFoundException(TASK_NOT_FOUND));
         return TaskMapper.toDTO(task);
     }
 
@@ -45,7 +48,7 @@ public class TaskService {
         Category category = null;
         if (task.categoryId() != null) {
             category = categoryRepository.findById(task.categoryId())
-                    .orElseThrow(() -> new BadRequestException("Category not found!"));
+                    .orElseThrow(() -> new BadRequestException(CATEGORY_NOT_FOUND));
         }
 
         Task entity = new Task(
@@ -64,11 +67,11 @@ public class TaskService {
         Category category = null;
         if (updatedTask.categoryId() != null) {
             category = categoryRepository.findById(updatedTask.categoryId())
-                    .orElseThrow(() -> new BadRequestException("Category not found!"));
+                    .orElseThrow(() -> new BadRequestException(CATEGORY_NOT_FOUND));
         }
 
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Task not found!"));
+                .orElseThrow(() -> new BadRequestException(TASK_NOT_FOUND));
         task.setCategory(category);
         task.setDescription(updatedTask.description());
         task.setStatus(updatedTask.status());
@@ -82,6 +85,6 @@ public class TaskService {
             taskRepository.deleteById(id);
             return;
         }
-        throw new NotFoundException("Task nof found!");
+        throw new NotFoundException(TASK_NOT_FOUND);
     }
 }
