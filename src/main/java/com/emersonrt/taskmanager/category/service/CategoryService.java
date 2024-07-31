@@ -18,6 +18,8 @@ import java.util.UUID;
 @Service
 public class CategoryService {
 
+    private static final String CATEGORY_NOT_FOUND = "Category not found!";
+
     private final CategoryRepository categoryRepository;
 
     private final TaskRepository taskRepository;
@@ -36,7 +38,7 @@ public class CategoryService {
 
     public CategoryResponseDTO getCategoryById(UUID id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Category not found!"));
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND));
         return CategoryMapper.toDTO(category);
     }
 
@@ -54,7 +56,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponseDTO updateCategory(UUID id, CategoryRequestDTO updatedCategory) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Category not found!"));
+                .orElseThrow(() -> new BadRequestException(CATEGORY_NOT_FOUND));
         category.setName(updatedCategory.name());
         category.setDescription(updatedCategory.description());
 
@@ -63,7 +65,7 @@ public class CategoryService {
 
     public void deleteCategory(UUID id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Category not found!"));
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND));
 
         if (taskRepository.existsByCategoryId(id)) {
             throw new ConflictException("Category cannot be deleted because it has associated tasks. Please reassign or delete tasks first.");

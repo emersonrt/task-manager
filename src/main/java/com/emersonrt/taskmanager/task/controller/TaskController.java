@@ -4,7 +4,6 @@ import com.emersonrt.taskmanager.task.model.dto.TaskRequestDTO;
 import com.emersonrt.taskmanager.task.model.dto.TaskResponseDTO;
 import com.emersonrt.taskmanager.task.service.TaskService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +15,11 @@ import java.util.UUID;
 @RequestMapping("/tasks")
 public class TaskController {
 
-    @Autowired
-    private TaskService taskService;
+    private final TaskService taskService;
+
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
+    }
 
     @GetMapping
     public ResponseEntity<List<TaskResponseDTO>> getAllTasks() {
