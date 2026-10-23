@@ -1,11 +1,11 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.3.2'
-	id 'io.spring.dependency-management' version '1.1.6'
+	id 'org.springframework.boot' version '3.5.16'
+	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.emersonrt'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0'
 
 java {
 	toolchain {
@@ -17,27 +17,38 @@ repositories {
 	mavenCentral()
 }
 
+dependencyManagement {
+	imports {
+		// Keeps the embedded PostgreSQL used in tests on the same major version as compose.yaml
+		mavenBom 'io.zonky.test.postgres:embedded-postgres-binaries-bom:17.11.0'
+	}
+}
+
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
-	implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
-	implementation 'org.flywaydb:flyway-core:9.22.3'
-	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
 	runtimeOnly 'org.postgresql:postgresql'
+	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-	testImplementation 'org.testcontainers:junit-jupiter'
-	testImplementation 'org.testcontainers:postgresql'
+	testImplementation 'io.zonky.test:embedded-database-spring-test:2.8.0'
+	testImplementation 'io.zonky.test:embedded-postgres:2.2.2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs << '-Xlint:deprecation'
+}
+
+tasks.named('jar') {
+	enabled = false
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-test {
-	systemProperty 'spring.profiles.active', 'development'
 }
