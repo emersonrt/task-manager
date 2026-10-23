@@ -1,25 +1,29 @@
 package com.emersonrt.taskmanager.task.service;
 
-import com.emersonrt.taskmanager.category.model.Category;
-import com.emersonrt.taskmanager.category.repository.CategoryRepository;
-import com.emersonrt.taskmanager.exception.BadRequestException;
-import com.emersonrt.taskmanager.exception.NotFoundException;
-import com.emersonrt.taskmanager.task.model.Task;
-import com.emersonrt.taskmanager.task.model.TaskMapper;
-import com.emersonrt.taskmanager.task.model.dto.TaskRequestDTO;
-import com.emersonrt.taskmanager.task.model.dto.TaskResponseDTO;
-import com.emersonrt.taskmanager.task.repository.TaskRepository;
+import com.emersonrt.taskmanager.category.domain.Category;
+import com.emersonrt.taskmanager.category.out.persistence.CategoryRepository;
+import com.emersonrt.taskmanager.common.error.InvalidReferenceException;
+import com.emersonrt.taskmanager.common.error.ResourceNotFoundException;
+import com.emersonrt.taskmanager.task.domain.Task;
+import com.emersonrt.taskmanager.task.domain.TaskStatus;
+import com.emersonrt.taskmanager.task.dto.TaskMapper;
+import com.emersonrt.taskmanager.task.dto.TaskRequest;
+import com.emersonrt.taskmanager.task.dto.TaskResponse;
+import com.emersonrt.taskmanager.task.out.persistence.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class TaskService {
 
-    private final TaskRepository taskRepository;
+    private static final String RESOURCE = "Task";
 
+    private final TaskRepository taskRepository;
     private final CategoryRepository categoryRepository;
 
     public TaskService(TaskRepository taskRepository, CategoryRepository categoryRepository) {
@@ -27,61 +31,46 @@ public class TaskService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<TaskResponseDTO> getAllTasks() {
-        List<Task> taskList = taskRepository.findAll();
-        return taskList.stream()
-                .map(TaskMapper::toDTO)
-                .toList();
+    public Page<TaskResponse> search(TaskStatus status, UUID categoryId, Pageable pageable) {
+        return taskRepository.search(status, categoryId, pageable).map(TaskMapper::toResponse);
     }
 
-    public TaskResponseDTO getTaskById(UUID id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Task not found!"));
-        return TaskMapper.toDTO(task);
+    public TaskResponse findById(UUID id) {
+        return TaskMapper.toResponse(getTask(id));
     }
 
     @Transactional
-    public TaskResponseDTO createTask(TaskRequestDTO task) throws BadRequestException {
-        Category category = null;
-        if (task.categoryId() != null) {
-            category = categoryRepository.findById(task.categoryId())
-                    .orElseThrow(() -> new BadRequestException("Category not found!"));
-        }
-
-        Task entity = new Task(
-                UUID.randomUUID(),
-                task.title(),
-                task.description(),
-                task.status(),
-                category
-        );
-
-        return TaskMapper.toDTO(taskRepository.save(entity));
+    public TaskResponse create(TaskRequest request) {
+        Category category = resolveCategory(request.categoryId());
+        Task task = new Task(request.title(), request.description(), request.status(), category);
+        // Flush so the generated timestamps are part of the response
+        return TaskMapper.toResponse(taskRepository.saveAndFlush(task));
     }
 
     @Transactional
-    public TaskResponseDTO updateTask(UUID id, TaskRequestDTO updatedTask) {
-        Category category = null;
-        if (updatedTask.categoryId() != null) {
-            category = categoryRepository.findById(updatedTask.categoryId())
-                    .orElseThrow(() -> new BadRequestException("Category not found!"));
-        }
-
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Task not found!"));
-        task.setCategory(category);
-        task.setDescription(updatedTask.description());
-        task.setStatus(updatedTask.status());
-        task.setTitle(updatedTask.title());
-
-        return TaskMapper.toDTO(taskRepository.saveAndFlush(task));
+    public TaskResponse update(UUID id, TaskRequest request) {
+        Task task = getTask(id);
+        Category category = resolveCategory(request.categoryId());
+        task.update(request.title(), request.description(), request.status(), category);
+        taskRepository.flush();
+        return TaskMapper.toResponse(task);
     }
 
-    public void deleteTask(UUID id) {
-        if (taskRepository.existsById(id)) {
-            taskRepository.deleteById(id);
-            return;
+    @Transactional
+    public void delete(UUID id) {
+        taskRepository.delete(getTask(id));
+    }
+
+    private Task getTask(UUID id) {
+        return taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE, id));
+    }
+
+    private Category resolveCategory(UUID categoryId) {
+        if (categoryId == null) {
+            return null;
         }
-        throw new NotFoundException("Task nof found!");
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new InvalidReferenceException("Category", categoryId));
     }
 }

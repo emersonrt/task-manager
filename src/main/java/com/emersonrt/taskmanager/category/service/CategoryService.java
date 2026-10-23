@@ -1,25 +1,27 @@
 package com.emersonrt.taskmanager.category.service;
 
-import com.emersonrt.taskmanager.category.model.Category;
-import com.emersonrt.taskmanager.category.model.CategoryMapper;
-import com.emersonrt.taskmanager.category.model.dto.CategoryRequestDTO;
-import com.emersonrt.taskmanager.category.model.dto.CategoryResponseDTO;
-import com.emersonrt.taskmanager.category.repository.CategoryRepository;
-import com.emersonrt.taskmanager.exception.BadRequestException;
-import com.emersonrt.taskmanager.exception.ConflictException;
-import com.emersonrt.taskmanager.exception.NotFoundException;
-import com.emersonrt.taskmanager.task.repository.TaskRepository;
+import com.emersonrt.taskmanager.category.domain.Category;
+import com.emersonrt.taskmanager.category.dto.CategoryMapper;
+import com.emersonrt.taskmanager.category.dto.CategoryRequest;
+import com.emersonrt.taskmanager.category.dto.CategoryResponse;
+import com.emersonrt.taskmanager.category.out.persistence.CategoryRepository;
+import com.emersonrt.taskmanager.common.error.ConflictException;
+import com.emersonrt.taskmanager.common.error.ResourceNotFoundException;
+import com.emersonrt.taskmanager.task.out.persistence.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class CategoryService {
 
-    private final CategoryRepository categoryRepository;
+    private static final String RESOURCE = "Category";
 
+    private final CategoryRepository categoryRepository;
     private final TaskRepository taskRepository;
 
     public CategoryService(CategoryRepository categoryRepository, TaskRepository taskRepository) {
@@ -27,48 +29,51 @@ public class CategoryService {
         this.taskRepository = taskRepository;
     }
 
-    public List<CategoryResponseDTO> getAllCategories() {
-        List<Category> categoryList = categoryRepository.findAll();
-        return categoryList.stream()
-                .map(CategoryMapper::toDTO)
-                .toList();
+    public Page<CategoryResponse> findAll(Pageable pageable) {
+        return categoryRepository.findAll(pageable).map(CategoryMapper::toResponse);
     }
 
-    public CategoryResponseDTO getCategoryById(UUID id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Category not found!"));
-        return CategoryMapper.toDTO(category);
+    public CategoryResponse findById(UUID id) {
+        return CategoryMapper.toResponse(getCategory(id));
     }
 
     @Transactional
-    public CategoryResponseDTO createCategory(CategoryRequestDTO category) {
-        Category entity = new Category(
-                UUID.randomUUID(),
-                category.name(),
-                category.description()
-        );
-
-        return CategoryMapper.toDTO(categoryRepository.save(entity));
-    }
-
-    @Transactional
-    public CategoryResponseDTO updateCategory(UUID id, CategoryRequestDTO updatedCategory) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Category not found!"));
-        category.setName(updatedCategory.name());
-        category.setDescription(updatedCategory.description());
-
-        return CategoryMapper.toDTO(categoryRepository.save(category));
-    }
-
-    public void deleteCategory(UUID id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Category not found!"));
-
-        if (taskRepository.existsByCategoryId(id)) {
-            throw new ConflictException("Category cannot be deleted because it has associated tasks. Please reassign or delete tasks first.");
+    public CategoryResponse create(CategoryRequest request) {
+        if (categoryRepository.existsByNameIgnoreCase(request.name())) {
+            throw duplicateName(request.name());
         }
+        Category category = categoryRepository.saveAndFlush(new Category(request.name(), request.description()));
+        return CategoryMapper.toResponse(category);
+    }
 
+    @Transactional
+    public CategoryResponse update(UUID id, CategoryRequest request) {
+        Category category = getCategory(id);
+        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(request.name(), id)) {
+            throw duplicateName(request.name());
+        }
+        category.update(request.name(), request.description());
+        // Flush inside the repository so constraint violations surface as translated exceptions
+        categoryRepository.flush();
+        return CategoryMapper.toResponse(category);
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        Category category = getCategory(id);
+        if (taskRepository.existsByCategoryId(id)) {
+            throw new ConflictException("Category %s still has tasks. Move or delete them first".formatted(id));
+        }
         categoryRepository.delete(category);
+        categoryRepository.flush();
+    }
+
+    private Category getCategory(UUID id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE, id));
+    }
+
+    private static ConflictException duplicateName(String name) {
+        return new ConflictException("A category named '%s' already exists".formatted(name));
     }
 }

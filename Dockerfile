@@ -1,11 +1,17 @@
-# build container
-FROM gradle:jdk21 AS build
-COPY --chown=gradle:gradle . /home/gradle/src
-WORKDIR /home/gradle/src
-RUN gradle build --no-daemon -x test
+# Build stage: dependencies are resolved in their own layer so code changes do not re-download them
+FROM eclipse-temurin:21-jdk-alpine AS build
+WORKDIR /workspace
+COPY gradlew settings.gradle build.gradle ./
+COPY gradle gradle
+RUN ./gradlew dependencies --no-daemon > /dev/null
+COPY src src
+RUN ./gradlew bootJar --no-daemon
 
-# server container
-FROM openjdk:21
-WORKDIR /usr/src/task-manager
-COPY --from=build /home/gradle/src/build/libs/*.jar ./task-manager.jar
-CMD ["java", "-jar", "-Dlogging.level.root=DEBUG", "-Dlogging.level.org.springframework=DEBUG", "task-manager.jar"]
+# Runtime stage: JRE only, running as a non-root user
+FROM eclipse-temurin:21-jre-alpine
+RUN addgroup -S app && adduser -S app -G app
+WORKDIR /app
+COPY --from=build /workspace/build/libs/*.jar app.jar
+USER app
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
