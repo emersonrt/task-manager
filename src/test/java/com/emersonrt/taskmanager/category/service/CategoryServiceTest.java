@@ -1,8 +1,12 @@
-package com.emersonrt.taskmanager.category;
+package com.emersonrt.taskmanager.category.service;
 
+import com.emersonrt.taskmanager.category.domain.Category;
+import com.emersonrt.taskmanager.category.dto.CategoryRequest;
+import com.emersonrt.taskmanager.category.dto.CategoryResponse;
+import com.emersonrt.taskmanager.category.out.persistence.CategoryRepository;
 import com.emersonrt.taskmanager.common.error.ConflictException;
 import com.emersonrt.taskmanager.common.error.ResourceNotFoundException;
-import com.emersonrt.taskmanager.task.TaskRepository;
+import com.emersonrt.taskmanager.task.out.persistence.TaskRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -14,8 +14,13 @@ Spring Boot 3.5 REST API (Java 21, PostgreSQL, Flyway). Portfolio project: small
 
 ## Architecture
 
-- Packages by feature: `category`, `task`, and `common` for shared code. Keep mappers package-private.
-- Controllers only handle HTTP. Business rules live in services.
+- Packages by feature first (`category`, `task`, and `common` for shared code), then by role inside each feature:
+  - `in/web`: inbound adapters (REST controllers). New entry points such as message consumers go under `in/<kind>`.
+  - `out/persistence`: outbound adapters (Spring Data repositories). New outputs such as message producers go under `out/<kind>`.
+  - `service`: business rules and transactions.
+  - `domain`: JPA entities and enums.
+  - `dto`: request and response records plus the mapper from entities to responses.
+- Controllers only handle HTTP. Business rules live in services. Controllers never touch repositories or entities directly.
 - Services are `@Transactional(readOnly = true)` at class level. Write methods add `@Transactional`.
 - When a response depends on generated values (ids, timestamps) or a constraint may fail, flush through the repository before mapping (`saveAndFlush` or `repository.flush()`).
 - Entities have no public setters. Changes go through intent methods such as `update(...)`.

@@ -1,5 +1,7 @@
-package com.emersonrt.taskmanager.task;
+package com.emersonrt.taskmanager.task.out.persistence;
 
+import com.emersonrt.taskmanager.task.domain.Task;
+import com.emersonrt.taskmanager.task.domain.TaskStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

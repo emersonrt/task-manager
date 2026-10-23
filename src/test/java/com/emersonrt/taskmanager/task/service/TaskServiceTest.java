@@ -1,9 +1,14 @@
-package com.emersonrt.taskmanager.task;
+package com.emersonrt.taskmanager.task.service;
 
-import com.emersonrt.taskmanager.category.Category;
-import com.emersonrt.taskmanager.category.CategoryRepository;
+import com.emersonrt.taskmanager.category.domain.Category;
+import com.emersonrt.taskmanager.category.out.persistence.CategoryRepository;
 import com.emersonrt.taskmanager.common.error.InvalidReferenceException;
 import com.emersonrt.taskmanager.common.error.ResourceNotFoundException;
+import com.emersonrt.taskmanager.task.domain.Task;
+import com.emersonrt.taskmanager.task.domain.TaskStatus;
+import com.emersonrt.taskmanager.task.dto.TaskRequest;
+import com.emersonrt.taskmanager.task.dto.TaskResponse;
+import com.emersonrt.taskmanager.task.out.persistence.TaskRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

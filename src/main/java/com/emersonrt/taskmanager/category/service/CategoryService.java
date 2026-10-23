@@ -1,8 +1,13 @@
-package com.emersonrt.taskmanager.category;
+package com.emersonrt.taskmanager.category.service;
 
+import com.emersonrt.taskmanager.category.domain.Category;
+import com.emersonrt.taskmanager.category.dto.CategoryMapper;
+import com.emersonrt.taskmanager.category.dto.CategoryRequest;
+import com.emersonrt.taskmanager.category.dto.CategoryResponse;
+import com.emersonrt.taskmanager.category.out.persistence.CategoryRepository;
 import com.emersonrt.taskmanager.common.error.ConflictException;
 import com.emersonrt.taskmanager.common.error.ResourceNotFoundException;
-import com.emersonrt.taskmanager.task.TaskRepository;
+import com.emersonrt.taskmanager.task.out.persistence.TaskRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,7 +19,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class CategoryService {
 
-    static final String RESOURCE = "Category";
+    private static final String RESOURCE = "Category";
 
     private final CategoryRepository categoryRepository;
     private final TaskRepository taskRepository;

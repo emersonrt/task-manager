@@ -1,4 +1,4 @@
-package com.emersonrt.taskmanager.task;
+package com.emersonrt.taskmanager.task.domain;
 
 public enum TaskStatus {
     TODO,

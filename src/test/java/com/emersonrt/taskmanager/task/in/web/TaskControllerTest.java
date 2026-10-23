@@ -1,7 +1,10 @@
-package com.emersonrt.taskmanager.task;
+package com.emersonrt.taskmanager.task.in.web;
 
 import com.emersonrt.taskmanager.common.error.InvalidReferenceException;
 import com.emersonrt.taskmanager.common.error.ResourceNotFoundException;
+import com.emersonrt.taskmanager.task.domain.TaskStatus;
+import com.emersonrt.taskmanager.task.dto.TaskResponse;
+import com.emersonrt.taskmanager.task.service.TaskService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

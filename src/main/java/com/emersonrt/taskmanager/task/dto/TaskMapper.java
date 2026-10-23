@@ -1,13 +1,14 @@
-package com.emersonrt.taskmanager.task;
+package com.emersonrt.taskmanager.task.dto;
 
-import com.emersonrt.taskmanager.category.Category;
+import com.emersonrt.taskmanager.category.domain.Category;
+import com.emersonrt.taskmanager.task.domain.Task;
 
-final class TaskMapper {
+public final class TaskMapper {
 
     private TaskMapper() {
     }
 
-    static TaskResponse toResponse(Task task) {
+    public static TaskResponse toResponse(Task task) {
         Category category = task.getCategory();
         return new TaskResponse(
                 task.getId(),

@@ -1,5 +1,7 @@
-package com.emersonrt.taskmanager.category;
+package com.emersonrt.taskmanager.category.in.web;
 
+import com.emersonrt.taskmanager.category.dto.CategoryResponse;
+import com.emersonrt.taskmanager.category.service.CategoryService;
 import com.emersonrt.taskmanager.common.error.ConflictException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

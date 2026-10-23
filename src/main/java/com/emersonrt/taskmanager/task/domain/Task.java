@@ -1,6 +1,6 @@
-package com.emersonrt.taskmanager.task;
+package com.emersonrt.taskmanager.task.domain;
 
-import com.emersonrt.taskmanager.category.Category;
+import com.emersonrt.taskmanager.category.domain.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

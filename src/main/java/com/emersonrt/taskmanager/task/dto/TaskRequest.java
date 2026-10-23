@@ -1,5 +1,6 @@
-package com.emersonrt.taskmanager.task;
+package com.emersonrt.taskmanager.task.dto;
 
+import com.emersonrt.taskmanager.task.domain.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

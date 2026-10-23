@@ -97,14 +97,19 @@ Integration tests use Zonky's embedded PostgreSQL binaries and reset the databas
 
 ```
 src/main/java/com/emersonrt/taskmanager
-├── category        Category endpoints, service, entity and DTOs
-├── task            Task endpoints, service, entity and DTOs
+├── category
+│   ├── in/web            REST controller (inbound adapter)
+│   ├── out/persistence   Spring Data repository (outbound adapter)
+│   ├── service           Business rules and transactions
+│   ├── domain            JPA entity
+│   └── dto               Request and response records, entity to response mapper
+├── task                  Same layout as category, plus the TaskStatus enum in domain
 └── common
-    ├── error       Domain exceptions and the global problem detail handler
-    └── web         Shared web types (page envelope, OpenAPI config)
+    ├── error             Domain exceptions and the global problem detail handler
+    └── web               Shared web types (page envelope, OpenAPI config)
 ```
 
-Code is organized by feature, so everything about tasks lives in one package.
+Code is organized by feature first, so everything about tasks lives under `task`. Inside a feature, `in` holds what calls the application (today only HTTP) and `out` holds what the application calls (today only the database), so a message consumer or producer would get its own package next to `web` or `persistence`.
 
 ## What I would add next
 

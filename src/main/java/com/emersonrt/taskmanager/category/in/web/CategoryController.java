@@ -1,5 +1,8 @@
-package com.emersonrt.taskmanager.category;
+package com.emersonrt.taskmanager.category.in.web;
 
+import com.emersonrt.taskmanager.category.dto.CategoryRequest;
+import com.emersonrt.taskmanager.category.dto.CategoryResponse;
+import com.emersonrt.taskmanager.category.service.CategoryService;
 import com.emersonrt.taskmanager.common.web.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

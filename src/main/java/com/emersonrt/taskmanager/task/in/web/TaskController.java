@@ -1,6 +1,10 @@
-package com.emersonrt.taskmanager.task;
+package com.emersonrt.taskmanager.task.in.web;
 
 import com.emersonrt.taskmanager.common.web.PageResponse;
+import com.emersonrt.taskmanager.task.domain.TaskStatus;
+import com.emersonrt.taskmanager.task.dto.TaskRequest;
+import com.emersonrt.taskmanager.task.dto.TaskResponse;
+import com.emersonrt.taskmanager.task.service.TaskService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;

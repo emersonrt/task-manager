@@ -1,4 +1,6 @@
-package com.emersonrt.taskmanager.task;
+package com.emersonrt.taskmanager.task.dto;
+
+import com.emersonrt.taskmanager.task.domain.TaskStatus;
 
 import java.time.Instant;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.emersonrt.taskmanager.category;
+package com.emersonrt.taskmanager.category.dto;
 
 import java.util.UUID;
 
